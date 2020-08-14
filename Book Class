@@ -1,0 +1,35 @@
+import csv
+
+class book:
+    def __init__(self,bookID=" ",bookname=" ",auname=" ",pyear=" ",genre=" ",bookcount=" "):
+        self.bookID=bookID
+        self.bookname=bookname
+        self.auname=auname 
+        self.pyear=pyear  
+        self.genre=genre
+        self.bookcount=bookcount
+    def add_book(self):
+        print()
+        print("\t\t\t New Book Entry \t\t\t")
+        print()
+        print()
+        self.bookID=input("\t Enter the ID number:")
+        print()     
+        self.bookname=input("\t Enter Name of the Book:")
+        print()
+        self.auname=input("\t Enter Name of the Author:")
+        print()
+        self.pyear=input("\t Enter the year of publication:")
+        print()
+        self.genre=input("\t Which Genre book belongs to:")
+        print()
+        self.bookcount=input("\t How many copies recieved:")
+        print()
+        print()
+        print ("\t \t \t Book added to Database file \t \t \t")
+abc = book()
+abc.add_book()
+with open('book.csv', mode='w') as books:
+        Bookfile = csv.writer(books, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        Bookfile.writerow([abc.bookID,abc.bookname, abc.auname, abc.pyear,abc.genre,abc.bookcount])
+     
