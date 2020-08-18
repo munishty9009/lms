@@ -1,0 +1,305 @@
+import csv
+import os
+
+class book: # Class book
+    
+    def __init__(self,book_id='',book_name='',author='',published_year='',genre='',book_count=''):
+        self.book_id = book_id
+        self.book_name = book_name
+        self.author = author
+        self.published_year = published_year
+        self.genre = genre
+        self.book_count = book_count
+
+    def add_book(self):
+        print()
+        print("\t\t\t New Book Entry \t\t\t")
+        print()
+        print()
+        self.book_id=input("\t Enter the ID number:")
+        print()     
+        self.book_name=input("\t Enter Name of the Book:")
+        print()
+        self.author=input("\t Enter Name of the Author:")
+        print()
+        self.published_year=input("\t Enter the year of publication:")
+        print()
+        self.genre=input("\t Which Genre book belongs to:")
+        print()
+        self.book_count=input("\t How many copies recieved:")
+        print()
+        print()
+        print ("\t \t \t Book added to Database file \t \t \t")
+
+        with open('book.csv', mode='a') as books:
+            Bookfile = csv.writer(books, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            Bookfile.writerow([self.book_id,self.book_name,self.author,self.published_year,self.genre,self.book_count])
+
+class member():
+    
+    def __init__(self,member_id='',member_name='',books_issued=[],membership_status=''):
+        self.member_id = member_id
+        self.member_name = member_name
+        self.books_issued = books_issued
+        self.membership_status = membership_status
+    
+    def add_member(self):
+        print()
+        print("\t\t\t New Member Entry \t\t\t")
+        print()
+        print()
+        self.member_id=input("\t Enter the Member ID number:")
+        print()     
+        self.member_name=input("\t Enter Name of the Member:")
+        print()
+        print("\t Enter books issued to the member(Book IDs), enter quit to exit")
+        while(True):
+            
+            id = input()
+            if id == "quit":
+                break
+            self.books_issued.append(id)
+
+        print()
+        self.membership_status=input("\t Enter the membership status of the member:")
+        print()
+        print()
+        print ("\t \t \t Member added to Database file \t \t \t")
+
+        with open('member.csv', mode='a') as members:
+            membersfile = csv.writer(members, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            membersfile.writerow([self.member_id,self.member_name,self.books_issued,self.membership_status])
+            self.books_issued.clear()
+    
+    def update_membershipstatus(self):
+        state = ''
+        if(self.membership_status == 'Y'):
+            self.membership_status = 'N'
+            state = 'N'
+        elif (self.membership_status == 'N'):
+            self.membership_status = 'Y'
+            state = 'Y'
+        else:
+            self.membership_status = 'Y'
+            state = 'Y'
+
+        def writer(header, data, filename):
+            with open (filename, "w", newline = "") as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames = header)
+                writer.writeheader()
+                writer.writerows(data)
+       
+
+        with open('member.csv', newline= "") as file:
+            readData = [row for row in csv.DictReader(file)]
+            #print(len(readData))
+            for x in range(0,len(readData)):
+                if readData[x]['member_name'] == self.member_name:
+                    readData[x]['membership_status'] = state
+            #print(readData)
+        
+            readHeader = readData[x].keys()
+            writer(readHeader, readData, 'member.csv')              
+        
+    
+class library(book,member):
+    
+    def __init__(self,booklist='',memberlist='',issuelist='',name=''):
+        self.booklist = booklist
+        self.memberlist = memberlist
+        self.issuelist = {}
+        self.name = name
+
+    def add_book(self,book):
+        self.booklist.append(book)
+    
+    def issue_book(self,member,book):
+        ## Read Library Csv file for existing issued book in format (Member Name ,Book ID)
+        with open('library.csv', 'r') as lib:
+            csv_read=csv.reader(lib)
+            for x,y in csv_read:
+                self.issuelist.update({x:y})
+        ##
+        if book.book_id not in self.issuelist.values():
+            self.issuelist.update({member.member_name:book.book_id})
+            member.books_issued.append(book.book_id)
+        else:
+            print("Book already issued to {0}".format(member.member_name))
+           
+    def add_member(self,member):
+        
+        self.memberlist.append(member)
+    
+
+    def list_allbooks(self):
+      
+        if len(self.booklist) > 0:
+            print(f"The Library:{self.name}, has below listed books: \n")
+            for book in self.booklist:
+                print(f"Book Name:{book.book_name}")
+                print(f"Book ID:{book.book_id}, Published Year:{book.published_year}, Author:{book.author}, Genre:{book.genre}, Copies:{book.book_count}")
+                print("-------------------------------")
+        else:
+            print("Currently, this Library has no books.")
+    
+    def list_allmemberships(self):
+        
+        if len(self.memberlist) > 0:
+            print(f"The Library:{self.name}, has below listed members: \n")
+            for member in self.memberlist:
+                print(f"Member Name:{member.member_name}")
+                print(f"Member ID:{member.member_id}")
+                print(f"His/Her membership status is:{member.membership_status}")
+                if len(member.books_issued) > 0:
+                    print("this member has below books issued to him/her")
+                    for item in member.books_issued:
+                        #print(f"Book Name:{book.book_name}")
+                        print(f"Book ID:{item}")
+                        #print(f"Book ID:{book.book_id}, Published Year:{book.published_year}, Author:{book.author}, Genre:{book.genre}, Copies:{book.book_count}")
+                        print("-------------------------------")
+                else:
+                    print("Currently, this member has no books issued to him/her.")
+                
+        else:
+            print("Currently, this Library has no members.")
+
+    def list_allissuedbooks(self):
+        if len(self.issuelist) > 0:
+            print(f"Below is the list of issued books: \n")
+            for book in self.issuelist:
+                print(f"Book Name:{book.book_name}")
+                #print(f"Book ID:{book.book_id}, Published Year:{book.published_year}, Author:{book.author}, Genre:{book.genre}, Copies:{book.book_count}")
+                print("-------------------------------")
+        else:
+            print("Currently, All the books are available.")
+
+    def list_allbooksbasedonGenre(self):
+        pass
+
+    def list_Activemembers(self):
+        if len(self.memberlist) > 0:
+            #print(f"The Library:{self.name}, has below Active members: \n")
+            for member in self.memberlist:
+                #print(f"Member Name:{member.member_name}")
+                #print(f"Member ID:{member.member_id}")
+                #print(f"His/Her membership status is:{member.membership_status}")
+                if member.membership_status == 'Y':
+                    print(f"Member Name:{member.member_name}")    
+                    print(f"Member ID:{member.member_id}")
+                    print("-------------------------------")
+                else:
+                    print("Currently, there are no active members")
+        else:
+            print("Currently, this Library has no members.")
+
+    def List_Inactivemembers(self):
+        if len(self.memberlist) > 0:
+            #print(f"The Library:{self.name}, has below Inactive members: \n")
+            for member in self.memberlist:
+                #print(f"Member Name:{member.member_name}")
+                #print(f"Member ID:{member.member_id}")
+                #print(f"His/Her membership status is:{member.membership_status}")
+                if member.membership_status == 'N':
+                    print(f"Member Name:{member.member_name}")    
+                    print(f"Member ID:{member.member_id}")
+                    print("-------------------------------")
+                else:
+                    print("Currently, there are no Inactive members")
+        else:
+            print("Currently, this Library has no members.")
+    
+def main():
+    #print("Press 1 Add Book")
+    #print("Press 2 Add Member)
+    #print("Press 3 Issue Book"")
+    #print("Press 4 Update Member Status")
+    #print("Press 5 List Items")
+    #print("Press 6 Search Items")
+    #print("Press 7 To Exit")
+
+    #select_activity=int(input("Select activity type ,  choice from 1-7: "))
+    #if(select_activity==1):
+        #print()
+        #print("\t\t\t New Book Entry \t\t\t")
+        #print()
+        #print()
+        #book_id=input("\t Enter the ID number:")
+        #print()     
+        #book_name=input("\t Enter Name of the Book:")
+        #print()
+        #author=input("\t Enter Name of the Author:")
+        #print()
+        #published_year=input("\t Enter the year of publication:")
+        #print()
+        #genre=input("\t Which Genre book belongs to:")
+        #print()
+        #book_count=input("\t How many copies recieved:")
+        #new_book=book(book_id,book_name,author,published_year,genre,book_count)
+        #new_book.add_book()
+        #print()
+        #print()
+        #print ("\t \t \t Book added to Database file \t \t \t")
+    
+    #elif(select_activity==2):
+        #print()
+        #print("\t\t\t New Member Entry \t\t\t")
+        #print()
+        #print()
+        #self.member_id=input("\t Enter the Member ID number:")
+        #print()     
+        #self.member_name=input("\t Enter Name of the Member:")
+        #print()
+        #print("\t Enter books issued to the member(Book IDs), enter quit to exit")
+        #while(True):
+        #    
+        #    id = input()
+        #    if id == "quit":
+        #        break
+        #    self.books_issued.append(id)
+
+        #print()
+        #self.membership_status=input("\t Enter the membership status of the member:")
+        #print()
+        #print()
+        #print ("\t \t \t Member added to Database file \t \t \t")
+
+
+    
+
+    ds = book()
+    #db = book()
+    ds.add_book()
+    #db.add_book()
+    Munish = member()
+    #Ratz = member()
+    Munish.add_member()
+    #Ratz.add_member()
+    lms = library([],[],[],'IIT-D Library')
+
+    #lms.issue_book(Ratz,db)
+    lms.issue_book(Munish,ds)
+    #print(lms.issuelist)
+
+    #lms.add_book(ds)
+    #lms.add_book(db)    
+    #lms.add_member(Munish)
+    #lms.add_member(Ratz)
+    #print(lms.list_allbooks())
+    #print(lms.list_allmemberships())
+    #Munish.update_membershipstatus()
+    #print(lms.list_allmemberships())
+    #print(lms.list_allissuedbooks())
+    #print(lms.list_Activemembers())
+    #print(lms.List_Inactivemembers())
+    #print(lms.list_Activemembers())
+
+    ## Code to finally update issue List (Library.CSV)##
+    with open('library.csv', 'w',newline="") as lib:
+        csv_writer=csv.writer(lib)
+        for x,y in lms.issuelist.items():
+            row=x,y
+            csv_writer.writerow(row)
+    print('All Good')
+    ##
+if __name__ == "__main__":
+    main()
